@@ -121,8 +121,7 @@ contract Visibility {
 ```
 In Solidity, functions can be categorized based on their **visibility, behavior, and purpose**. Here are the different types of functions:
 
-### Functions:
-### *I. Based on Visibility**
+### **I. Based on Visibility**
 Visibility determines who can call the function.
 
 ### **a) Public Functions (`public`)**
@@ -185,7 +184,7 @@ contract Example {
 }
 ```
 
-## **II. Based on Behavior**
+### **II. Based on Behavior**
 These define how the function interacts with storage and transactions.
 
 ### **a) View Functions (`view`)**
@@ -257,7 +256,7 @@ contract Example {
 }
 ```
 
-## **III. Based on Modifiers**
+### **III. Based on Modifiers**
 Modifiers are used to change function behavior.
 
 ### **a) Functions with Custom Modifiers**
@@ -350,11 +349,25 @@ Provides blockchain-related information.
 ### Example:
 ```solidity
 contract GlobalVars {
+
+    constructor() {
+contractAddress = address(this); // "this" is a Global variable
+
+}
+
     address public sender = msg.sender;
     uint public time = block.timestamp;
     uint public blockNum = block.number;
 }
 ```
+
+### **Explanation of Global Variables Used**
+| **Variable**       | **Description** |
+|------------------|----------------|
+| `msg.sender`    | The address of the sender who called the function or deployed the contract. |
+| `block.timestamp` | The Unix timestamp of when the block was mined. Useful for time-based logic. |
+| `block.number`   | The current block number in the blockchain. |
+| `address(this)`  | The address of the deployed contract itself. |
 
 ## 10. Operators
 Solidity supports arithmetic, comparison, and logical operators.
@@ -383,14 +396,122 @@ contract Conditionals {
 Solidity supports static and dynamic arrays.
 
 ### Example:
+
+### **Fixed-Size and Dynamic Arrays in Solidity**
 ```solidity
-contract Arrays {
-    uint[] public numbers;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MyContract {
+    // **Dynamic Arrays (size not fixed)**
+    uint[] public array1 = [1, 2, 3]; // Dynamic array initialized with values
+    uint[] public array2;             // Dynamic array, initially empty
+
+    // **Fixed-Size Array (size is fixed)**
+    uint[10] public array3;           // Fixed-size array with 10 elements, all initialized to 0
+
+    // **Dynamic String Array**
+    string[] public array4 = ["apple", "banana", "carrot"]; // Dynamic array initialized with values
+    string[] public array5;  // Empty dynamic string array
+
+    // **Fixed-Size String Array**
+    string[10] public array6; // Fixed-size array with 10 empty string elements
+}
+```
+
+
+### **Explanation of Different Arrays**
+| **Array Type** | **Declaration** | **Description** |
+|--------------|--------------|----------------|
+| **Dynamic Array (uint)** | `uint[] public array1 = [1, 2, 3];` | An array that can grow or shrink dynamically. |
+| **Empty Dynamic Array (uint)** | `uint[] public array2;` | Starts empty and elements can be added later. |
+| **Fixed-Size Array (uint)** | `uint[10] public array3;` | Fixed-size array with 10 elements, defaulting to 0. |
+| **Dynamic String Array** | `string[] public array4 = ["apple", "banana", "carrot"];` | Dynamic array storing strings. |
+| **Empty Dynamic String Array** | `string[] public array5;` | Starts empty and can store strings later. |
+| **Fixed-Size String Array** | `string[10] public array6;` | Fixed-size array with 10 slots for strings, initialized as empty. |
+
+
+### **Solidity Arrays: Features & Functions (Push, Pop, etc.)**
+In Solidity, **arrays** come with built-in functions like `push()`, `pop()`, and others that allow manipulation of the array. Below is a breakdown of important **array features** along with examples.
+
+---
+
+### **Built-in Array Functions**
+| **Function** | **Description** | **Example Usage** |
+|-------------|---------------|-----------------|
+| `push(value)` | Adds a new element to the end of a **dynamic** array | `array.push(5);` |
+| `pop()` | Removes the last element from a **dynamic** array | `array.pop();` |
+| `length` | Returns the number of elements in the array | `uint len = array.length;` |
+| `delete array[index]` | Deletes an element at the given index, setting it to **default value** | `delete array[1];` (for `uint` array, sets value to `0`) |
+| `array[index]` | Accesses or modifies an element at a specific index | `array[0] = 10;` |
+| `array = new uint;` |
+
+---
+
+### ** Example Solidity Contract with Push & Pop**
+Here’s a contract demonstrating how to **add, remove, and manipulate** array elements dynamically:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ArrayFunctions {
+    uint[] public numbers; // Dynamic uint array
+
+    // Function to add a number (push)
     function addNumber(uint _num) public {
-        numbers.push(_num);
+        numbers.push(_num); // Adds a new element at the end
+    }
+
+    // Function to remove the last number (pop)
+    function removeLast() public {
+        require(numbers.length > 0, "Array is empty");
+        numbers.pop(); // Removes the last element
+    }
+
+    // Function to get the length of the array
+    function getLength() public view returns (uint) {
+        return numbers.length;
+    }
+
+    // Function to get an element by index
+    function getElement(uint index) public view returns (uint) {
+        require(index < numbers.length, "Index out of bounds");
+        return numbers[index]; // Returns the element at the given index
+    }
+
+    // Function to delete an element at a specific index
+    function deleteElement(uint index) public {
+        require(index < numbers.length, "Index out of bounds");
+        delete numbers[index]; // Sets value at index to 0 (for uint array)
+    }
+
+    // Function to create a new dynamic array of a given size
+    function createNewArray(uint size) public pure returns (uint[] memory) {
+        uint[] memory newArray = new uint[](size); // Creates a temporary dynamic array
+        return newArray;
     }
 }
 ```
+
+---
+
+### **Explanation of Functions**
+| **Function** | **Purpose** |
+|-------------|------------|
+| `addNumber(uint _num)` | Uses `.push()` to add a number to the array. |
+| `removeLast()` | Uses `.pop()` to remove the last element from the array. |
+| `getLength()` | Returns the length of the array. |
+| `getElement(uint index)` | Retrieves an element at a specific index. |
+| `deleteElement(uint index)` | Uses `delete` to set an index's value to 0. |
+| `createNewArray(uint size)` | Creates a new temporary array of a given size. |
+
+---
+
+## **Important Notes**
+1. **Fixed-size arrays** do **not** support `.push()` and `.pop()` since their size is predetermined.
+2. **Deleting an element** using `delete array[index]` does **not** shrink the array; it only resets the value to the default (`0` for uints, empty string for `string[]`).
+3. **Using dynamic arrays** allows for flexible size management, while fixed-size arrays consume predictable gas.
 
 ## 13. Mappings
 Key-value storage.
