@@ -1,5 +1,28 @@
 # Solidity Basics
 
+`
+1. What is Solidty?
+2. Variables
+3. Types
+4. Function 
+5. Visibility
+6. Modifiers
+7. Custom Modifiers 
+8. Constructors 
+9. Global Variables 
+10. Operators 
+11. Conditionals 
+12. Arrays 
+13. Mappings 
+14. Structs 
+15. Events 
+16. Ether 
+17. Errors 
+18. Inheritance 
+19. Calling Other Contracts 
+20. Interfaces
+`
+
 ## 1. What is Solidity?
 Solidity is a high-level, statically-typed programming language designed for writing smart contracts on the Ethereum blockchain.
 
