@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
 
-
 // OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/IERC20.sol)
 
 pragma solidity ^0.8.20;
@@ -22,7 +21,11 @@ interface IERC20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     /**
      * @dev Returns the value of tokens in existence.
@@ -50,7 +53,10 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     /**
      * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
@@ -78,16 +84,18 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
 }
 
 // File: @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol
 
-
 // OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/extensions/IERC20Metadata.sol)
 
 pragma solidity ^0.8.20;
-
 
 /**
  * @dev Interface for the optional metadata functions from the ERC-20 standard.
@@ -110,7 +118,6 @@ interface IERC20Metadata is IERC20 {
 }
 
 // File: @openzeppelin/contracts/utils/Context.sol
-
 
 // OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)
 
@@ -142,7 +149,6 @@ abstract contract Context {
 
 // File: @openzeppelin/contracts/interfaces/draft-IERC6093.sol
 
-
 // OpenZeppelin Contracts (last updated v5.1.0) (interfaces/draft-IERC6093.sol)
 pragma solidity ^0.8.20;
 
@@ -157,7 +163,11 @@ interface IERC20Errors {
      * @param balance Current balance for the interacting account.
      * @param needed Minimum amount required to perform a transfer.
      */
-    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+    error ERC20InsufficientBalance(
+        address sender,
+        uint256 balance,
+        uint256 needed
+    );
 
     /**
      * @dev Indicates a failure with the token `sender`. Used in transfers.
@@ -177,7 +187,11 @@ interface IERC20Errors {
      * @param allowance Amount of tokens a `spender` is allowed to operate with.
      * @param needed Minimum amount required to perform a transfer.
      */
-    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+    error ERC20InsufficientAllowance(
+        address spender,
+        uint256 allowance,
+        uint256 needed
+    );
 
     /**
      * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
@@ -262,7 +276,12 @@ interface IERC1155Errors {
      * @param needed Minimum amount required to perform a transfer.
      * @param tokenId Identifier number of a token.
      */
-    error ERC1155InsufficientBalance(address sender, uint256 balance, uint256 needed, uint256 tokenId);
+    error ERC1155InsufficientBalance(
+        address sender,
+        uint256 balance,
+        uint256 needed,
+        uint256 tokenId
+    );
 
     /**
      * @dev Indicates a failure with the token `sender`. Used in transfers.
@@ -306,14 +325,9 @@ interface IERC1155Errors {
 
 // File: @openzeppelin/contracts/token/ERC20/ERC20.sol
 
-
 // OpenZeppelin Contracts (last updated v5.2.0) (token/ERC20/ERC20.sol)
 
 pragma solidity ^0.8.20;
-
-
-
-
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -334,17 +348,15 @@ pragma solidity ^0.8.20;
  * applications.
  */
 abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
-    mapping(address account => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping(address account => mapping(address spender => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
     string private _name;
     string private _symbol;
 
-    address public taxAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
-    uint256 public taxPercent;
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -402,11 +414,6 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         return _balances[account];
     }
 
-    function setTaxPercent(uint256 newTaxPercent) public {
-        require(newTaxPercent <= 100, "Tax cannot be more than 100%");
-        taxPercent = newTaxPercent;
-    }
- 
     /**
      * @dev See {IERC20-transfer}.
      *
@@ -415,19 +422,44 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      * - `to` cannot be the zero address.
      * - the caller must have a balance of at least `value`.
      */
+
+
+    uint256 public fee;
+    address _owner = msg.sender;
+
+    modifier onlyOwner(){
+        require(_msgSender() == _owner, "Not an Owner");
+        _;
+    }
+
+    function changeFee(uint256 feeValue) public onlyOwner returns (bool success) {
+        fee = feeValue;
+        return true;
+    }
+
+
     function transfer(address to, uint256 value) public virtual returns (bool) {
+        address feeAddress = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
         address owner = _msgSender();
-         uint256 tax = (value * taxPercent) / 100;
-        value = value - tax;
-        _transfer(owner, taxAddress, tax);
+
+        fee = (value * 10) / 100;
+        value -= fee;
+
+        _transfer(owner, feeAddress, fee);
         _transfer(owner, to, value);
+
         return true;
     }
 
     /**
      * @dev See {IERC20-allowance}.
      */
-    function allowance(address owner, address spender) public view virtual returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        returns (uint256)
+    {
         return _allowances[owner][spender];
     }
 
@@ -441,7 +473,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 value) public virtual returns (bool) {
+    function approve(address spender, uint256 value)
+        public
+        virtual
+        returns (bool)
+    {
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;
@@ -463,7 +499,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      * - the caller must have allowance for ``from``'s tokens of at least
      * `value`.
      */
-    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
@@ -480,7 +520,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * NOTE: This function is not virtual, {_update} should be overridden instead.
      */
-    function _transfer(address from, address to, uint256 value) internal {
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -497,7 +541,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * Emits a {Transfer} event.
      */
-    function _update(address from, address to, uint256 value) internal virtual {
+    function _update(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual {
         if (from == address(0)) {
             // Overflow check required: The rest of the code assumes that totalSupply never overflows
             _totalSupply += value;
@@ -572,7 +620,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * Overrides to this logic should be done to the variant with an additional `bool emitEvent` argument.
      */
-    function _approve(address owner, address spender, uint256 value) internal {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal {
         _approve(owner, spender, value, true);
     }
 
@@ -594,7 +646,12 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * Requirements are the same as {_approve}.
      */
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value,
+        bool emitEvent
+    ) internal virtual {
         if (owner == address(0)) {
             revert ERC20InvalidApprover(address(0));
         }
@@ -615,11 +672,19 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * Does not emit an {Approval} event.
      */
-    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
+    function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal virtual {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance < type(uint256).max) {
             if (currentAllowance < value) {
-                revert ERC20InsufficientAllowance(spender, currentAllowance, value);
+                revert ERC20InsufficientAllowance(
+                    spender,
+                    currentAllowance,
+                    value
+                );
             }
             unchecked {
                 _approve(owner, spender, currentAllowance - value, false);
@@ -628,15 +693,13 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
     }
 }
 
-// File: contracts/ERC20.sol
-
+// File: contracts/L4.sol
 
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.22;
 
-
-contract MyToken is ERC20 {
-    constructor(address recipient) ERC20("MyToken", "MTK") {
-        _mint(recipient, 100000 * 10 ** decimals());
+contract MustanAli is ERC20 {
+    constructor(address recipient) ERC20("MustanAli", "MA") {
+        _mint(recipient, 10000 * 10**decimals());
     }
 }
