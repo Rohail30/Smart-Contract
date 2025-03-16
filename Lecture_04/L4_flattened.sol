@@ -698,8 +698,8 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.22;
 
-contract MustanAli is ERC20 {
-    constructor(address recipient) ERC20("MustanAli", "MA") {
+contract Rohail is ERC20 {
+    constructor(address recipient) ERC20("Rohail", "RR") {
         _mint(recipient, 10000 * 10**decimals());
     }
 }
