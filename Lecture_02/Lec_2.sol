@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-contract Part_A {
+contract Lec_2 {
 
     receive() external payable {}   // Function to receive Ether
     address payable _owner = payable(msg.sender);    //Assinging _owner as the contract deployer
