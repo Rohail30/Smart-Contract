@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-contract Part_A {
+contract Lec_1 {
     int a = 10;
     int b = 5;
 
