@@ -3,13 +3,8 @@
 pragma solidity >=0.8.2 <0.9.0;
 
 contract Part_A {
-    string public message = "Hello World!";
     int a = 10;
     int b = 5;
-
-    // View function: Reads state but does not modify it.
-    // Pure function: Does not read or modify state, only uses inputs
-    // Function without view or pure: Can read and modify state
 
     function Addition() public view returns (int) {
         return a + b;
