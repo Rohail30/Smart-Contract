@@ -21,10 +21,15 @@ contract Staking {
         stakedAmount[msg.sender] += _amount;
     }
 
-     function withdraw(uint256 _amount) external {
+    function unstake(uint _amount) public {
+        require(stakedAmount[msg.sender] >= _amount, "Insufficient Balance");
         stakedAmount[msg.sender] -= _amount;
+        token.transfer( msg.sender, _amount);
+    }
+
+     function withdraw(uint256 _amount) external {
         token.transfer(msg.sender, _amount);
+        stakedAmount[msg.sender] -= _amount;
     }
 
 }
-
