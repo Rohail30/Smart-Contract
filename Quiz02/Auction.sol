@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.22;
@@ -23,6 +22,21 @@ contract Auction {
     Listing[] public listings;
     uint256 public ListingId;
 
+    event Listed(
+        address seller,
+        address token,
+        uint256 amount,
+        uint256 pricePerToken,
+        uint256 deadline
+    );
+
+    event Purchased(
+        address buyer,
+        uint256 amount,
+        uint256 totalCost
+    );
+
+
      constructor(address _token){
         token = MyToken(_token);
     }
@@ -31,6 +45,8 @@ contract Auction {
         require(totalAmount > 0, "Amount must be > 0");
         require(pricePerToken > 0, "Price must be > 0");
         _token.transferFrom(msg.sender, address(this), totalAmount);
+
+        emit Listed(msg.sender, address(token), totalAmount, pricePerToken, block.timestamp);
     }
 
      function buyTokens(uint256 listingId, uint256 tokenAmount) external payable {
@@ -49,6 +65,8 @@ contract Auction {
             payable(msg.sender).transfer(msg.value - totalCost);
         }
         listing.remainingAmount -= tokenAmount;
+
+        emit Purchased(msg.sender, tokenAmount,totalCost);
     }
 
     function getListCount() public view returns(uint256){
