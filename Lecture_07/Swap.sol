@@ -21,8 +21,18 @@ contract Swapping {
     IERC20 tokenA;
     IERC20 tokenB;
     uint256 rate;
+    address owner;
 
     event Swap(address _tA, address _tB, uint256 _r);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
+    function setRate(uint256 _rate) external onlyOwner {
+        rate = _rate;
+    }
 
     constructor(
         address _tokenA,
@@ -32,13 +42,13 @@ contract Swapping {
         tokenA = IERC20(_tokenA);
         tokenB = IERC20(_tokenB);
         rate = _rate;
+        owner = msg.sender;
     }
 
     function swap(uint256 _amount) external {
         require(_amount > 0, "Amount should be greater than ZERO");
 
         tokenA.transferFrom(msg.sender, address(this), rate * _amount);
-        // tokenB.transferFrom(address(this), msg.sender, _amount);
         tokenB.transfer(msg.sender, _amount);
 
         emit Swap(address(tokenA), address(tokenB), rate);
